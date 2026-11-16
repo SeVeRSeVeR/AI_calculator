@@ -5,3 +5,8 @@ public/docs/
 coverage/
 *.local
 .DS_Store
+
+# Deployment config files (не загружаем в git, используют при деплое)
+.vercel.json
+vercel.json
+netlify.toml
