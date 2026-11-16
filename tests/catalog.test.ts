@@ -22,7 +22,7 @@ describe('каталог', () => {
   });
 
   it('все новые GPU имеют корректные флаги платформы', () => {
-    for (const id of ['rtx_pro_5000_bw_48', 'rtx_pro_5000_bw_72', 'rtx_pro_6000_bw_ws', 'rtx_pro_6000_bw_maxq', 'rtx_5090', 'rtx_5080', 'rtx_5070_ti', 'rtx_5060_ti_16', 'amd_r9700_pro', 'intel_arc_pro_b70']) {
+    for (const id of ['rtx_pro_5000_bw_48', 'rtx_pro_5000_bw_72', 'rtx_pro_6000_bw_ws', 'rtx_pro_6000_bw_maxq', 'rtx5090', 'rtx5080', 'rtx5070ti', 'rtx_5060_ti_16', 'amd_r9700_pro', 'intel_arc_pro_b70']) {
       const gpu = catalog.gpus.find((item) => item.id === id);
       expect(gpu, `GPU ${id}`).toBeTruthy();
       expect(gpu!.unified_memory).toBe(false);
