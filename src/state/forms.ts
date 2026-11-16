@@ -13,6 +13,7 @@ export interface ModeAForm {
   utilTarget: number | '';
   targetToks: number | '';
   useDSpark: boolean;
+  gpuFilter: string;
 }
 
 export interface ModeBForm {
@@ -36,6 +37,7 @@ export const DEFAULT_MODE_A: ModeAForm = {
   utilTarget: '',
   targetToks: '',
   useDSpark: false,
+  gpuFilter: '',
 };
 
 export const DEFAULT_MODE_B: ModeBForm = {
