@@ -56,6 +56,7 @@ export function mergeSeed(
   a.gpuCount = clampInt(rawA.gpuCount ?? a.gpuCount, 1, 8, 1);
   a.context = clampInt(rawA.context ?? a.context, 1, 1_048_576, 8192);
   a.users = clampInt(rawA.users ?? a.users, 1, 10_000, 1);
+  if (typeof rawA.useDSpark === 'boolean') a.useDSpark = rawA.useDSpark;
   if (rawA.targetToks !== undefined) a.targetToks = clampInt(rawA.targetToks, 1, 1_000, '');
   if (rawA.utilTarget !== undefined) {
     const util = Number(rawA.utilTarget);
@@ -64,7 +65,7 @@ export function mergeSeed(
   if (rawA.profile && PROFILES.includes(rawA.profile)) a.profile = rawA.profile;
 
   if (rawB.modelId) {
-    if (catalog.models.some((model) => model.id === rawB.modelId)) b.modelId = rawB.modelId;
+    if (catalog.models.some((model) => model.id === rawB.modelId && !model.is_draft)) b.modelId = rawB.modelId;
     else if (activeMode === 'b') ignored = true;
   }
   if (rawB.quantId) {
@@ -75,6 +76,7 @@ export function mergeSeed(
   b.users = clampInt(rawB.users ?? b.users, 1, 10_000, 1);
   b.targetToks = clampInt(rawB.targetToks ?? b.targetToks, 1, 1_000, 15);
   if (rawB.profile && PROFILES.includes(rawB.profile)) b.profile = rawB.profile;
+  if (typeof rawB.useDSpark === 'boolean') b.useDSpark = rawB.useDSpark;
 
   if (seed.mode === 'b' || b.modelId) mode = 'b';
   if (seed.mode === 'a') mode = 'a';

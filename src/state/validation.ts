@@ -88,6 +88,7 @@ export function validateModeB(form: ModeBForm, catalog: Catalog, model: Model | 
 
   if (!form.modelId) errors.modelId = ru.validation.modelRequired;
   else if (!model) errors.modelId = ru.validation.modelRequired;
+  else if (model.is_draft) errors.modelId = ru.validation.modelDraft;
 
   if (isBlank(form.context)) errors.context = ru.validation.required;
   else if (!isInteger(Number(form.context)) || Number(form.context) < 1 || Number(form.context) > 1_048_576) {

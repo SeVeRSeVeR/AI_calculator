@@ -856,6 +856,98 @@
       "commercial_ok": true,
       "geometry_source": "https://huggingface.co/ornith-ai/Ornith-1.5-122B/blob/main/config.json",
       "notes": "config.json содержит 256 экспертов (top-8), но по данным задания модель учтена как dense."
+    },
+    {
+      "id": "dspark-draft-qwen3-8b",
+      "name": "DSpark Draft for Qwen3-8B",
+      "vendor": "DeepSeek",
+      "family": "DSpark",
+      "moe": false,
+      "params_total_b": 0.5,
+      "params_active_b": 0.5,
+      "n_layers": 36,
+      "n_kv_heads": 8,
+      "head_dim": 128,
+      "max_context": 40960,
+      "license": "MIT",
+      "commercial_ok": true,
+      "status": "released",
+      "release_year": 2026,
+      "geometry_source": "https://github.com/deepseek-ai/DSpark",
+      "is_draft": true,
+      "dspark_target_models": [
+        "qwen3-8b"
+      ],
+      "notes": "DSpark draft-модель (EAGLE-style). Размер и геометрия — консервативная оценка."
+    },
+    {
+      "id": "dspark-draft-llama-3.1-8b",
+      "name": "DSpark Draft for Llama 3.1 8B",
+      "vendor": "DeepSeek",
+      "family": "DSpark",
+      "moe": false,
+      "params_total_b": 0.5,
+      "params_active_b": 0.5,
+      "n_layers": 32,
+      "n_kv_heads": 8,
+      "head_dim": 128,
+      "max_context": 131072,
+      "license": "MIT",
+      "commercial_ok": true,
+      "status": "released",
+      "release_year": 2026,
+      "geometry_source": "https://github.com/deepseek-ai/DSpark",
+      "is_draft": true,
+      "dspark_target_models": [
+        "llama-3.1-8b"
+      ],
+      "notes": "DSpark draft-модель (EAGLE-style). Размер и геометрия — консервативная оценка."
+    },
+    {
+      "id": "dspark-draft-deepseek-v4-flash",
+      "name": "DSpark Draft for DeepSeek V4-Flash",
+      "vendor": "DeepSeek",
+      "family": "DSpark",
+      "moe": false,
+      "params_total_b": 1,
+      "params_active_b": 1,
+      "n_layers": 43,
+      "n_kv_heads": 1,
+      "head_dim": 512,
+      "max_context": 1048576,
+      "license": "MIT",
+      "commercial_ok": true,
+      "status": "released",
+      "release_year": 2026,
+      "geometry_source": "https://github.com/deepseek-ai/DSpark",
+      "is_draft": true,
+      "dspark_target_models": [
+        "deepseek-v4-flash"
+      ],
+      "notes": "DSpark draft-модель (EAGLE-style). Размер и геометрия — консервативная оценка."
+    },
+    {
+      "id": "dspark-draft-kimi-k3",
+      "name": "DSpark Draft for Kimi K3",
+      "vendor": "DeepSeek",
+      "family": "DSpark",
+      "moe": false,
+      "params_total_b": 1.5,
+      "params_active_b": 1.5,
+      "n_layers": 93,
+      "n_kv_heads": 96,
+      "head_dim": 128,
+      "max_context": 1048576,
+      "license": "MIT",
+      "commercial_ok": true,
+      "status": "released",
+      "release_year": 2026,
+      "geometry_source": "https://github.com/deepseek-ai/DSpark",
+      "is_draft": true,
+      "dspark_target_models": [
+        "kimi_k3"
+      ],
+      "notes": "DSpark draft-модель (EAGLE-style). Размер и геометрия — консервативная оценка."
     }
   ]
 }

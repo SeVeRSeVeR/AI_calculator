@@ -192,6 +192,22 @@ export function ModeA() {
             ))}
           </div>
 
+          <div className="field checkbox-field">
+            <label htmlFor="dspark-a">
+              <input
+                id="dspark-a"
+                type="checkbox"
+                checked={a.useDSpark}
+                onChange={(event) => setA({ useDSpark: event.target.checked })}
+              />
+              <span>DSpark — спекулятивное декодирование</span>
+            </label>
+            <p className="field-hint">
+              Draft-модель подбирается для каждой целевой модели. Ускорение: 1.5× для vLLM/SGLang,
+              1.3× для llama.cpp; TGI не поддерживает DSpark.
+            </p>
+          </div>
+
           <div className="field-row">
             <div className="field">
               <label htmlFor="engine">Движок</label>
@@ -266,6 +282,7 @@ export function ModeA() {
             ) : (
               <span className="muted">
                 {gpus.length} × {gpu?.name ?? 'GPU'} · {quant?.name} · {tokens(Number(a.context))} токенов
+                {a.useDSpark ? ' · DSpark' : ''}
               </span>
             )}
           </div>
@@ -381,7 +398,9 @@ function NoFitRow({ evaluation }: { evaluation: ModelEvaluation }) {
       ? 'нужно выгрузить больше 50% весов'
       : evaluation.reason === 'KV_POOL_EXHAUSTED'
         ? 'нет места под KV-кеш'
-        : evaluation.reason === 'PER_GPU_OVERFLOW'
+        : evaluation.reason === 'DSPARK_DRAFT_DOES_NOT_FIT'
+          ? 'DSpark draft-модель не помещается'
+          : evaluation.reason === 'PER_GPU_OVERFLOW'
           ? 'переполнение на одну GPU'
           : evaluation.reason === 'OFFLOAD_UNSUPPORTED'
             ? 'движок без offload'

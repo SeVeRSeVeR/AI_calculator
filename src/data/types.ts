@@ -42,6 +42,8 @@ export interface Model {
   release_year: number;
   geometry_source: string;
   notes?: string;
+  is_draft?: boolean;
+  dspark_target_models?: string[];
 }
 
 export interface Quantization {
@@ -64,6 +66,7 @@ export interface Engine {
   supports_tp: boolean;
   kv_bytes_per_elem: number;
   quant_family: 'gpu' | 'gguf';
+  supports_dspark: boolean;
   notes: string;
 }
 
@@ -98,7 +101,8 @@ export type FitReason =
   | 'PER_GPU_OVERFLOW'
   | 'OFFLOAD_TOO_LARGE'
   | 'OFFLOAD_UNSUPPORTED'
-  | 'KV_DOES_NOT_FIT';
+  | 'KV_DOES_NOT_FIT'
+  | 'DSPARK_DRAFT_DOES_NOT_FIT';
 
 export interface SpeedEstimate {
   tokPerSeq: number;
@@ -110,4 +114,5 @@ export interface SpeedEstimate {
   bwEffectiveGbs: number;
   efficiency: number;
   tpFactor: number;
+  dsparkSpeedup: number;
 }

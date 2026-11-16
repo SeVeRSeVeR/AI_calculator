@@ -55,6 +55,7 @@ export const ru = {
     targetRange: 'Целевой tok/s — целое от 1 до 1 000',
     utilRange: 'Утилизация VRAM — от 0.80 до 0.95',
     modelRequired: 'Выберите модель',
+    modelDraft: 'Draft-модель DSpark нельзя выбрать как целевую',
     contextOverMax: (max: number) => `Контекст превышает максимум модели — ${max.toLocaleString('ru-RU')} токенов`,
     quantRequired: 'Выберите квантизацию',
     engineRequired: 'Выберите движок',

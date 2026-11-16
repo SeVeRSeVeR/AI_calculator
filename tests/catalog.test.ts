@@ -31,4 +31,19 @@ describe('каталог', () => {
     expect(catalog.gpus.find((item) => item.id === 'amd_r9700_pro')!.rocm_support).toBe(true);
     expect(catalog.gpus.find((item) => item.id === 'intel_arc_pro_b70')!.xpu_support).toBe(true);
   });
+
+  it('DSpark: движки размечены, draft-модели ссылаются на существующие цели', () => {
+    const flags = Object.fromEntries(catalog.engines.map((item) => [item.id, item.supports_dspark]));
+    expect(flags).toEqual({ vllm: true, llama_cpp: true, tgi: false, sglang: true });
+
+    const drafts = catalog.models.filter((item) => item.is_draft);
+    expect(drafts.length).toBeGreaterThanOrEqual(4);
+    const targetIds = new Set(catalog.models.filter((item) => !item.is_draft).map((item) => item.id));
+    for (const draft of drafts) {
+      expect(draft.dspark_target_models?.length ?? 0).toBeGreaterThan(0);
+      for (const target of draft.dspark_target_models ?? []) {
+        expect(targetIds.has(target), `${draft.id} -> ${target}`).toBe(true);
+      }
+    }
+  });
 });

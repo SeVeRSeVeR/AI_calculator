@@ -2,7 +2,10 @@ import type { Engine, FitReason, FitStatus, Gpu, Model, Profile, Quantization, S
 import {
   computeFullMemory,
   computeOffloadMemory,
+  dsparkWarning,
   estimateSpeed,
+  findDraftModel,
+  isDsparkActive,
   type FullMemoryResult,
   type MemoryInput,
   type OffloadResult,
@@ -32,6 +35,10 @@ export interface ModelEvaluation {
   spareRatio: number;
   servesRequestedUsers: boolean;
   speed: SpeedEstimate;
+  draftWeightsGb: number;
+  dsparkSpeedup: number;
+  dsparkRequested: boolean;
+  dsparkWarning: string | null;
 }
 
 const STATUS_ORDER: Record<FitStatus, number> = {
@@ -76,6 +83,17 @@ export function evaluateModel(input: EvaluationInput): ModelEvaluation {
     reason = 'OFFLOAD_UNSUPPORTED';
   }
 
+  // Если без draft-модели конфигурация помещалась, а с DSpark — нет,
+  // сообщаем именно о нехватке памяти под draft-модель.
+  if (status === 'NO_FIT' && isDsparkActive(input.engine, input.useDSpark, input.draftModel)) {
+    const noDraftInput = { ...input, useDSpark: false, draftModel: null };
+    const noDraftFull = computeFullMemory(noDraftInput);
+    const noDraftOffload = computeOffloadMemory(noDraftInput);
+    const targetWouldFit =
+      (noDraftFull.fitPerGpu && noDraftFull.kvPoolGb > 0) || Boolean(noDraftOffload?.feasible);
+    if (targetWouldFit) reason = 'DSPARK_DRAFT_DOES_NOT_FIT';
+  }
+
   const useOffload = status === 'FITS_WITH_RAM' && offload;
   const weightsInVram = useOffload ? offload.weightsOnGpuGb : full.weightsGb;
   const weightsOffloaded = useOffload ? offload.weightsOffloadedGb : 0;
@@ -94,7 +112,11 @@ export function evaluateModel(input: EvaluationInput): ModelEvaluation {
     maxParallel,
     profile: input.profile,
     offloadRatio,
+    useDSpark: input.useDSpark,
+    draftModel: input.draftModel,
   });
+
+  const draftWeightsGb = useOffload ? offload.draftWeightsGb : full.draftWeightsGb;
 
   return {
     model: input.model,
@@ -114,6 +136,10 @@ export function evaluateModel(input: EvaluationInput): ModelEvaluation {
     spareRatio,
     servesRequestedUsers: maxParallel >= input.users,
     speed,
+    draftWeightsGb,
+    dsparkSpeedup: speed.dsparkSpeedup,
+    dsparkRequested: Boolean(input.useDSpark),
+    dsparkWarning: dsparkWarning(input.engine, input.useDSpark, input.draftModel),
   };
 }
 
@@ -122,8 +148,14 @@ export function evaluateCatalog(
   base: Omit<EvaluationInput, 'model'>,
 ): ModelEvaluation[] {
   return models
-    .filter((model) => model.status === 'released')
-    .map((model) => evaluateModel({ ...base, model }))
+    .filter((model) => model.status === 'released' && !model.is_draft)
+    .map((model) =>
+      evaluateModel({
+        ...base,
+        model,
+        draftModel: base.useDSpark ? findDraftModel(models, model.id) : base.draftModel ?? null,
+      }),
+    )
     .sort((a, b) => {
       const byStatus = statusRank(a.status) - statusRank(b.status);
       if (byStatus !== 0) return byStatus;

@@ -12,6 +12,7 @@ export interface ModeAForm {
   engineId: string;
   utilTarget: number | '';
   targetToks: number | '';
+  useDSpark: boolean;
 }
 
 export interface ModeBForm {
@@ -21,6 +22,7 @@ export interface ModeBForm {
   users: number | '';
   targetToks: number | '';
   profile: Profile;
+  useDSpark: boolean;
 }
 
 export const DEFAULT_MODE_A: ModeAForm = {
@@ -33,6 +35,7 @@ export const DEFAULT_MODE_A: ModeAForm = {
   engineId: 'vllm',
   utilTarget: '',
   targetToks: '',
+  useDSpark: false,
 };
 
 export const DEFAULT_MODE_B: ModeBForm = {
@@ -42,6 +45,7 @@ export const DEFAULT_MODE_B: ModeBForm = {
   users: 1,
   targetToks: 15,
   profile: 'chat',
+  useDSpark: false,
 };
 
 export const STORAGE_KEY = 'llmcalc.v1';

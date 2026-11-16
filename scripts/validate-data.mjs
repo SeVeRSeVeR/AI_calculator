@@ -51,6 +51,29 @@ uniqueIds(data.quantizations.quantizations, 'quantizations');
 uniqueIds(data.engines.engines, 'engines');
 uniqueIds(data.cpus.cpus, 'cpus');
 
+const modelIds = new Set(data.models.models.map((model) => model.id));
+for (const model of data.models.models) {
+  if (model.is_draft) {
+    const targets = model.dspark_target_models ?? [];
+    if (targets.length === 0) {
+      console.error(`model ${model.id}: draft model without dspark_target_models`);
+      process.exit(1);
+    }
+    for (const target of targets) {
+      if (!modelIds.has(target)) {
+        console.error(`model ${model.id}: unknown dspark target ${target}`);
+        process.exit(1);
+      }
+    }
+  }
+}
+for (const engine of data.engines.engines) {
+  if (typeof engine.supports_dspark !== 'boolean') {
+    console.error(`engine ${engine.id}: supports_dspark must be boolean`);
+    process.exit(1);
+  }
+}
+
 for (const model of data.models.models) {
   if (model.params_active_b > model.params_total_b) {
     console.error(`✗ ${model.id}: params_active_b > params_total_b`);

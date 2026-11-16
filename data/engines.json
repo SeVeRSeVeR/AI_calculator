@@ -12,7 +12,8 @@
       "supports_tp": true,
       "kv_bytes_per_elem": 2,
       "quant_family": "gpu",
-      "notes": "gpu_memory_utilization=0.9 по умолчанию; CUDA graphs, activations и profiling reservation входят в overhead."
+      "notes": "gpu_memory_utilization=0.9 по умолчанию; CUDA graphs, activations и profiling reservation входят в overhead.",
+      "supports_dspark": true
     },
     {
       "id": "llama_cpp",
@@ -24,7 +25,8 @@
       "supports_tp": false,
       "kv_bytes_per_elem": 2,
       "quant_family": "gguf",
-      "notes": "Layer-split между GPU, offload через n_gpu_layers; фиксированный compute buffer."
+      "notes": "Layer-split между GPU, offload через n_gpu_layers; фиксированный compute buffer.",
+      "supports_dspark": true
     },
     {
       "id": "tgi",
@@ -36,7 +38,8 @@
       "supports_tp": true,
       "kv_bytes_per_elem": 2,
       "quant_family": "gpu",
-      "notes": "Text Generation Inference; резервирует память аналогично vLLM."
+      "notes": "Text Generation Inference; резервирует память аналогично vLLM.",
+      "supports_dspark": false
     },
     {
       "id": "sglang",
@@ -48,7 +51,8 @@
       "supports_tp": true,
       "kv_bytes_per_elem": 2,
       "quant_family": "gpu",
-      "notes": "Paged KV-сервер, RadixAttention; резерв ~10% VRAM."
+      "notes": "Paged KV-сервер, RadixAttention; резерв ~10% VRAM.",
+      "supports_dspark": true
     }
   ]
 }

@@ -36,6 +36,10 @@ function validateModel(value: unknown, index: number): Model {
   assert(typeof value.n_kv_heads === 'number' && value.n_kv_heads > 0, `models[${index}].n_kv_heads некорректен`);
   assert(typeof value.head_dim === 'number' && value.head_dim >= 16, `models[${index}].head_dim некорректен`);
   assert(typeof value.max_context === 'number' && value.max_context >= 512, `models[${index}].max_context некорректен`);
+  if (value.is_draft !== undefined) assert(typeof value.is_draft === 'boolean', `models[${index}].is_draft некорректен`);
+  if (value.dspark_target_models !== undefined) {
+    assert(Array.isArray(value.dspark_target_models) && value.dspark_target_models.every((item) => typeof item === 'string'), `models[${index}].dspark_target_models некорректен`);
+  }
   return value as unknown as Model;
 }
 
@@ -52,6 +56,7 @@ function validateEngine(value: unknown, index: number): Engine {
   assert(typeof value.id === 'string', `engines[${index}].id отсутствует`);
   assert(typeof value.default_util_target === 'number', `engines[${index}].default_util_target некорректен`);
   assert(typeof value.overhead_gb === 'number', `engines[${index}].overhead_gb некорректен`);
+  assert(typeof value.supports_dspark === 'boolean', `engines[${index}].supports_dspark некорректен`);
   return value as unknown as Engine;
 }
 

@@ -88,6 +88,17 @@ export function ConfigCard({ config, collapsed }: { config: HardwareConfig; coll
         </div>
       </dl>
 
+      {config.dsparkRequested ? (
+        config.dsparkSpeedup > 1 ? (
+          <p className="model-dspark">
+            DSpark: +{num((config.dsparkSpeedup - 1) * 100, 0)}% к скорости (draft-модель{' '}
+            {gb(config.draftWeightsGb)})
+          </p>
+        ) : (
+          <p className="model-warning">{config.dsparkWarning ?? 'DSpark не применён.'}</p>
+        )
+      ) : null}
+
       {config.offloadRatio > 0 ? (
         <p className="model-warning">
           {pct(config.offloadRatio)} весов в RAM, ожидаемое падение скорости ~

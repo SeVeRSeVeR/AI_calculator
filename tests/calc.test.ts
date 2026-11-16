@@ -138,4 +138,76 @@ describe('расчётное ядро и режим A', () => {
     expect(full.kvPoolGb).toBeLessThan(0);
     expect(full.fitPerGpu).toBe(true);
   });
+
+  it('11. DSpark: draft-модель в VRAM, ускорение 1.3×/1.5× и деградация fit на малой VRAM', () => {
+    const llama = model('llama-3.1-8b');
+    const draft = model('dspark-draft-llama-3.1-8b');
+    const base = {
+      gpus: gpuList('rtx4090', 1),
+      model: llama,
+      quant: quant('q4_k_m'),
+      engine: engine('llama_cpp'),
+      contextTokens: 8192,
+      users: 1,
+      profile: 'chat' as const,
+    };
+
+    const without = evaluateModel(base);
+    const withDSpark = evaluateModel({ ...base, useDSpark: true, draftModel: draft });
+    const expectedDraftGb = 0.5 * 0.55 * 1.05;
+
+    expect(withDSpark.full.draftWeightsGb).toBeCloseTo(expectedDraftGb, 3);
+    expect(withDSpark.full.weightsGb - without.full.weightsGb).toBeCloseTo(expectedDraftGb, 3);
+    expect(withDSpark.speed.tokPerSeq / without.speed.tokPerSeq).toBeCloseTo(1.3, 3);
+    expect(withDSpark.status).toBe(without.status);
+
+    const vllmBase = {
+      ...base,
+      quant: quant('awq_4bit'),
+      engine: engine('vllm'),
+    };
+    const vllmWithout = evaluateModel(vllmBase);
+    const vllmWithDSpark = evaluateModel({ ...vllmBase, useDSpark: true, draftModel: draft });
+    expect(vllmWithDSpark.speed.tokPerSeq / vllmWithout.speed.tokPerSeq).toBeCloseTo(1.5, 3);
+
+    const tgiWithDSpark = evaluateModel({
+      ...vllmBase,
+      engine: engine('tgi'),
+      useDSpark: true,
+      draftModel: draft,
+    });
+    expect(tgiWithDSpark.speed.dsparkSpeedup).toBe(1);
+    expect(tgiWithDSpark.dsparkWarning).toContain('не поддерживается');
+    expect(tgiWithDSpark.full.draftWeightsGb).toBe(0);
+
+    // 3060 12GB: умеренно большая draft-модель уводит конфигурацию в offload.
+    const offloadEval = evaluateModel({
+      gpus: gpuList('rtx3060', 1),
+      model: llama,
+      quant: quant('q4_k_m'),
+      engine: engine('llama_cpp'),
+      contextTokens: 8192,
+      users: 1,
+      profile: 'chat',
+      useDSpark: true,
+      draftModel: { ...draft, params_total_b: 8 },
+    });
+    expect(offloadEval.status).toBe('FITS_WITH_RAM');
+    expect(offloadEval.weightsOffloadedGb).toBeGreaterThan(0);
+
+    // Слишком большая draft-модель не помещается даже с offload.
+    const noFitEval = evaluateModel({
+      gpus: gpuList('rtx3060', 1),
+      model: llama,
+      quant: quant('q4_k_m'),
+      engine: engine('llama_cpp'),
+      contextTokens: 8192,
+      users: 1,
+      profile: 'chat',
+      useDSpark: true,
+      draftModel: { ...draft, params_total_b: 64 },
+    });
+    expect(noFitEval.status).toBe('NO_FIT');
+    expect(noFitEval.reason).toBe('DSPARK_DRAFT_DOES_NOT_FIT');
+  });
 });

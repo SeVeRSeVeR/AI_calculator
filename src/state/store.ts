@@ -144,6 +144,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         users: Number(a.users),
         utilTarget: a.utilTarget === '' ? undefined : Number(a.utilTarget),
         profile: a.profile,
+        useDSpark: a.useDSpark,
       });
       set({ attempted: true, resultA: result, selectedModelId: null, mode: 'a' });
       return;
@@ -165,6 +166,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       users: Number(b.users),
       targetToks: Number(b.targetToks),
       profile: b.profile,
+      useDSpark: b.useDSpark,
     });
     set({ attempted: true, resultB: result, mode: 'b' });
   },

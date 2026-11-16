@@ -14,7 +14,7 @@
         "type": "object",
         "required": [
           "id", "name", "gpu_only", "offload_supported", "default_util_target", "overhead_gb",
-          "supports_tp", "kv_bytes_per_elem", "quant_family", "notes"
+          "supports_tp", "kv_bytes_per_elem", "quant_family", "supports_dspark", "notes"
         ],
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
@@ -26,6 +26,7 @@
           "supports_tp": { "type": "boolean" },
           "kv_bytes_per_elem": { "type": "number", "exclusiveMinimum": 0 },
           "quant_family": { "enum": ["gpu", "gguf"] },
+          "supports_dspark": { "type": "boolean" },
           "notes": { "type": "string" }
         }
       }

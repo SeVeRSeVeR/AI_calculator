@@ -3,8 +3,10 @@ import {
   MAX_OFFLOAD_RATIO,
   computeFullMemory,
   computeOffloadMemory,
+  dsparkWarning,
   effectiveContext,
   estimateSpeed,
+  findDraftModel,
   round,
   sum,
   totalPhysicalVramGb,
@@ -36,6 +38,10 @@ export interface HardwareConfig {
   priceUsd: number | null;
   interconnect: string;
   warnings: string[];
+  draftWeightsGb: number;
+  dsparkSpeedup: number;
+  dsparkRequested: boolean;
+  dsparkWarning: string | null;
 }
 
 export interface Recommendation {
@@ -69,6 +75,8 @@ export interface ModeBRequest {
   users: number;
   targetToks: number;
   profile: Profile;
+  useDSpark?: boolean;
+  draftModel?: Model | null;
 }
 
 interface Combo {
@@ -104,6 +112,8 @@ function configFromFull(
   quant: Quantization,
   profile: Profile,
   catalog: Catalog,
+  useDSpark?: boolean,
+  draftModel?: Model | null,
 ): HardwareConfig {
   const speed = estimateSpeed({
     gpus: combo.gpus,
@@ -112,6 +122,8 @@ function configFromFull(
     engine,
     maxParallel: full.maxParallel,
     profile,
+    useDSpark,
+    draftModel,
   });
   const platform = recommendPlatform({
     gpus: combo.gpus,
@@ -123,6 +135,8 @@ function configFromFull(
   });
   const advice = multiGpuAdvice(combo.gpus, engine);
   const warnings = [...platform.warnings];
+  const dsparkNote = dsparkWarning(engine, useDSpark, draftModel);
+  if (dsparkNote) warnings.push(dsparkNote);
   if (advice.warning) warnings.push(advice.warning);
   if (full.maxParallel < full.users) {
     warnings.push(`KV-пула хватает на ${full.maxParallel} из ${full.users} одновременных пользователей.`);
@@ -148,6 +162,10 @@ function configFromFull(
     priceUsd: gpuPrice === null ? null : gpuPrice * combo.count + platform.extraPriceUsd,
     interconnect: advice.interconnect,
     warnings,
+    draftWeightsGb: full.draftWeightsGb,
+    dsparkSpeedup: speed.dsparkSpeedup,
+    dsparkRequested: Boolean(useDSpark),
+    dsparkWarning: dsparkNote,
   };
 }
 
@@ -161,6 +179,8 @@ function configFromOffload(
   quant: Quantization,
   profile: Profile,
   catalog: Catalog,
+  useDSpark?: boolean,
+  draftModel?: Model | null,
 ): HardwareConfig {
   const speed = estimateSpeed({
     gpus: combo.gpus,
@@ -170,6 +190,8 @@ function configFromOffload(
     maxParallel: offload.maxParallel,
     profile,
     offloadRatio: offload.offloadRatio,
+    useDSpark,
+    draftModel,
   });
   const platform = recommendPlatform({
     gpus: combo.gpus,
@@ -181,6 +203,8 @@ function configFromOffload(
   });
   const advice = multiGpuAdvice(combo.gpus, engine);
   const warnings = [...platform.warnings];
+  const dsparkNote = dsparkWarning(engine, useDSpark, draftModel);
+  if (dsparkNote) warnings.push(dsparkNote);
   if (advice.warning) warnings.push(advice.warning);
   if (offload.maxParallel < full.users) {
     warnings.push(`KV-пула хватает на ${offload.maxParallel} из ${full.users} одновременных пользователей.`);
@@ -206,6 +230,10 @@ function configFromOffload(
     priceUsd: gpuPrice === null ? null : gpuPrice * combo.count + platform.extraPriceUsd,
     interconnect: advice.interconnect,
     warnings,
+    draftWeightsGb: offload.draftWeightsGb,
+    dsparkSpeedup: speed.dsparkSpeedup,
+    dsparkRequested: Boolean(useDSpark),
+    dsparkWarning: dsparkNote,
   };
 }
 
@@ -218,7 +246,7 @@ function pickMinConfigs(
   engine: Engine,
   combos: Combo[],
 ): HardwareConfig[] {
-  const { catalog, model, quant, contextTokens, users, targetToks, profile } = req;
+  const { catalog, model, quant, contextTokens, users, targetToks, profile, useDSpark, draftModel } = req;
   const candidates: HardwareConfig[] = [];
   for (const combo of combos) {
     const full = computeFullMemory({
@@ -228,6 +256,8 @@ function pickMinConfigs(
       engine,
       contextTokens,
       users,
+      useDSpark,
+      draftModel,
     });
     const fullSpeedEstimate = estimateSpeed({
       gpus: combo.gpus,
@@ -236,6 +266,8 @@ function pickMinConfigs(
       engine,
       maxParallel: full.maxParallel,
       profile,
+      useDSpark,
+      draftModel,
     });
     const fullOk =
       full.fitPerGpu &&
@@ -244,7 +276,7 @@ function pickMinConfigs(
       fullSpeedEstimate.tokPerSeq >= targetToks * 0.5;
 
     if (fullOk) {
-      candidates.push(configFromFull('MIN', combo, full, engine, model, quant, profile, catalog));
+      candidates.push(configFromFull('MIN', combo, full, engine, model, quant, profile, catalog, useDSpark, draftModel));
       continue;
     }
 
@@ -255,6 +287,8 @@ function pickMinConfigs(
       engine,
       contextTokens,
       users,
+      useDSpark,
+      draftModel,
     });
     if (!offload || !offload.feasible || offload.offloadRatio > 0.4) continue;
     const offloadSpeed = estimateSpeed({
@@ -265,9 +299,11 @@ function pickMinConfigs(
       maxParallel: offload.maxParallel,
       profile,
       offloadRatio: offload.offloadRatio,
+      useDSpark,
+      draftModel,
     });
     if (offload.maxParallel < users || offloadSpeed.tokPerSeq < targetToks * 0.5) continue;
-    candidates.push(configFromOffload('MIN', combo, offload, full, engine, model, quant, profile, catalog));
+    candidates.push(configFromOffload('MIN', combo, offload, full, engine, model, quant, profile, catalog, useDSpark, draftModel));
   }
 
   candidates.sort(
@@ -286,7 +322,7 @@ function pickOptimalConfig(
   combos: Combo[],
   minVram: number,
 ): HardwareConfig | null {
-  const { catalog, model, quant, contextTokens, users, targetToks, profile } = req;
+  const { catalog, model, quant, contextTokens, users, targetToks, profile, useDSpark, draftModel } = req;
   const candidates: HardwareConfig[] = [];
   for (const combo of combos) {
     if (totalPhysicalVramGb(combo.gpus) < minVram) continue;
@@ -298,6 +334,8 @@ function pickOptimalConfig(
       contextTokens,
       users,
       utilTarget: 0.9,
+      useDSpark,
+      draftModel,
     });
     if (!full.fitPerGpu || full.kvPoolGb <= 0) continue;
     if (full.maxParallel < users) continue;
@@ -309,9 +347,11 @@ function pickOptimalConfig(
       engine,
       maxParallel: full.maxParallel,
       profile,
+      useDSpark,
+      draftModel,
     });
     if (speed.tokPerSeq < targetToks) continue;
-    candidates.push(configFromFull('OPTIMAL', combo, full, engine, model, quant, profile, catalog));
+    candidates.push(configFromFull('OPTIMAL', combo, full, engine, model, quant, profile, catalog, useDSpark, draftModel));
   }
 
   candidates.sort(
@@ -330,7 +370,7 @@ function pickMaxConfig(
   combos: Combo[],
   optimal: HardwareConfig,
 ): HardwareConfig | null {
-  const { catalog, model, quant, users, targetToks, profile } = req;
+  const { catalog, model, quant, users, targetToks, profile, useDSpark, draftModel } = req;
   const targetVram = optimal.physicalVramGb * 1.5;
   const targetParallel = Math.max(users * 2, optimal.maxParallel * 2);
   const scored: HardwareConfig[] = [];
@@ -346,6 +386,8 @@ function pickMaxConfig(
       contextTokens: req.contextTokens,
       users,
       utilTarget: 0.9,
+      useDSpark,
+      draftModel,
     });
     if (!full.fitPerGpu || full.kvPoolGb <= 0) continue;
     if (full.spareRatio < 0.4) continue;
@@ -357,9 +399,11 @@ function pickMaxConfig(
       engine,
       maxParallel: full.maxParallel,
       profile,
+      useDSpark,
+      draftModel,
     });
     if (speed.tokPerSeq < targetToks) continue;
-    scored.push(configFromFull('MAX', combo, full, engine, model, quant, profile, catalog));
+    scored.push(configFromFull('MAX', combo, full, engine, model, quant, profile, catalog, useDSpark, draftModel));
   }
 
   const preferred = scored
@@ -386,9 +430,11 @@ function pickMaxConfig(
       contextTokens: req.contextTokens,
       users,
       utilTarget: 0.9,
+      useDSpark,
+      draftModel,
     });
     if (!full.fitPerGpu || full.kvPoolGb <= 0) continue;
-    all.push(configFromFull('MAX', combo, full, engine, model, quant, profile, catalog));
+    all.push(configFromFull('MAX', combo, full, engine, model, quant, profile, catalog, useDSpark, draftModel));
   }
   const largest = all.sort((a, b) => b.physicalVramGb - a.physicalVramGb || priceOf(a) - priceOf(b))[0];
   if (!largest) return null;
@@ -453,6 +499,7 @@ function smallerModelRecommendations(req: ModeBRequest, combos: Combo[]): Recomm
     .filter(
       (candidate) =>
         candidate.status === 'released' &&
+        !candidate.is_draft &&
         candidate.id !== model.id &&
         candidate.params_total_b < model.params_total_b,
     )
@@ -470,6 +517,8 @@ function smallerModelRecommendations(req: ModeBRequest, combos: Combo[]): Recomm
       users,
       profile,
       utilTarget: 0.9,
+      useDSpark: req.useDSpark,
+      draftModel: req.useDSpark ? findDraftModel(catalog.models, candidate.id) : null,
     });
     if (feasible.status !== 'NO_FIT') {
       out.push({
@@ -488,7 +537,8 @@ export function buildConfigurations(req: ModeBRequest): ModeBResult {
   const { catalog, model, quant, users, targetToks } = req;
   const engine = engineForQuant(catalog, quant);
   const contextTokens = effectiveContext(model, req.contextTokens);
-  const effectiveReq: ModeBRequest = { ...req, contextTokens };
+  const draftModel = req.useDSpark ? findDraftModel(catalog.models, model.id) : null;
+  const effectiveReq: ModeBRequest = { ...req, contextTokens, draftModel };
   const combos = listCombos(catalog);
 
   const minCandidates = pickMinConfigs(effectiveReq, engine, combos);

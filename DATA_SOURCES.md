@@ -112,6 +112,10 @@
 | gemma_4_31b | Gemma 4 31B | 31 | 31 | 60 | 16 | 256 | 262144 | google/gemma-4-31B-it |
 | gemma_4_12b | Gemma 4 12B | 11.95 | 11.95 | 48 | 8 | 256 | 262144 | google/gemma-4-12B-it |
 | ornith_1_5_122b | Ornith 1.5 122B | 122 | 122 | 48 | 2 | 256 | 262144 | ornith-ai/Ornith-1.5-122B |
+| dspark-draft-qwen3-8b | DSpark Draft for Qwen3-8B | 0.5 | 0.5 | 36 | 8 | 128 | 40960 | DSpark (оценка) |
+| dspark-draft-llama-3.1-8b | DSpark Draft for Llama 3.1 8B | 0.5 | 0.5 | 32 | 8 | 128 | 131072 | DSpark (оценка) |
+| dspark-draft-deepseek-v4-flash | DSpark Draft for DeepSeek V4-Flash | 1 | 1 | 43 | 1 | 512 | 1048576 | DSpark (оценка) |
+| dspark-draft-kimi-k3 | DSpark Draft for Kimi K3 | 1.5 | 1.5 | 93 | 96 | 128 | 1048576 | DSpark (оценка) |
 
 Примечания:
 
@@ -127,6 +131,7 @@
 - `Llama 4 Maverick`: официальный `config.json` gated (HTTP 401); геометрия сверена с существующей записью `llama-4-maverick`.
 - `Ornith 1.5 122B`: в `config.json` обнаружены 256 экспертов (top-8), то есть архитектурно это MoE. По заданию запись внесена как dense (`moe = false`, 122/122); расхождение зафиксировано в `notes`.
 - `deepseek_v4_flash` и `gpt_oss_120b` дополняют существующие записи `deepseek-v4-flash` и `gpt-oss-120b` с другими значениями из задания; это осознанные отдельные записи каталога.
+- `is_draft: true` помечает draft-модели DSpark. Они не участвуют в обычном подборе целевых моделей и используются только при включённом DSpark; `dspark_target_models` содержит id целевых моделей.
 
 ## Ссылки на первоисточники
 
@@ -183,14 +188,24 @@
 
 ## Движки
 
-| id | Движок | GPU-only | Offload | util_target | Overhead, ГБ | TP | KV байт/элемент | Семейство квантизации |
-| --- | --- | --- | --- | ---: | ---: | --- | ---: | --- |
-| vllm | vLLM | да | нет | 0.90 | 1.5 | да | 2 | gpu |
-| llama_cpp | llama.cpp | нет | да | 0.95 | 1.5 | нет (layer-split) | 2 | gguf |
-| tgi | TGI | да | нет | 0.90 | 1.5 | да | 2 | gpu |
-| sglang | SGLang | да | нет | 0.90 | 1.5 | да | 2 | gpu |
+| id | Движок | GPU-only | Offload | util_target | Overhead, ГБ | TP | KV байт/элемент | DSpark | Семейство квантизации |
+| --- | --- | --- | --- | ---: | ---: | --- | ---: | --- | --- |
+| vllm | vLLM | да | нет | 0.90 | 1.5 | да | 2 | да | gpu |
+| llama_cpp | llama.cpp | нет | да | 0.95 | 1.5 | нет (layer-split) | 2 | да | gguf |
+| tgi | TGI | да | нет | 0.90 | 1.5 | да | 2 | нет | gpu |
+| sglang | SGLang | да | нет | 0.90 | 1.5 | да | 2 | да | gpu |
 
 Источники: документация vLLM (`gpu_memory_utilization`, PagedAttention), llama.cpp (`n_gpu_layers`, layer-split), Hugging Face TGI, SGLang (RadixAttention). `overhead_gb = 1.5` — консервативная оценка, а не параметр движка по умолчанию.
+
+### DSpark
+
+DSpark — спекулятивное декодирование DeepSeek с отдельной draft-моделью (EAGLE-style). В каталоге движков флаг `supports_dspark`: vLLM — да (PR #46995), llama.cpp — да (нативная поддержка с CUDA), TGI — нет, SGLang — да.
+
+- Репозиторий: <https://github.com/deepseek-ai/DSpark>
+- Коэффициенты ускорения взяты из открытых обзоров и бенчмарков: KDnuggets (<https://www.kdnuggets.com/>) и блог Liquid AI (<https://www.liquid.ai/blog>).
+- В расчёте используются консервативные значения: **1.5×** для vLLM/SGLang и **1.3×** для llama.cpp. В открытых бенчмарках встречается до **1.85×** в зависимости от движка и размера батча.
+- Draft-модели в `data/models.json` помечены `is_draft: true` и содержат `dspark_target_models` со списком целевых id. Их размеры (0.5–1.5B) — консервативная оценка, а не точные опубликованные параметры.
+- Целевой id для Kimi K3 в каталоге — `kimi_k3` (именно он указан в `dspark_target_models` draft-модели), чтобы ссылка была согласована с записью каталога.
 
 ## CPU
 

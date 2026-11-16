@@ -33,7 +33,7 @@ function parseFloatParam(raw: string | null, min: number, max: number): number |
 }
 
 const QUERY_KEYS = new Set([
-  'mode', 'gpu', 'n', 'ctx', 'u', 'q', 'e', 'profile', 'util', 'target', 'model',
+  'mode', 'gpu', 'n', 'ctx', 'u', 'q', 'e', 'profile', 'util', 'target', 'model', 'ds',
 ]);
 
 export function readSeed(): Seed | null {
@@ -108,6 +108,15 @@ export function readSeed(): Seed | null {
     b.profile = profile as Profile;
   } else if (profile !== null) ignored = true;
 
+  const ds = params.get('ds');
+  if (ds === '1') {
+    a.useDSpark = true;
+    b.useDSpark = true;
+  } else if (ds === '0') {
+    a.useDSpark = false;
+    b.useDSpark = false;
+  } else if (ds !== null) ignored = true;
+
   if (!mode) {
     if (model || b.modelId) mode = 'b';
     else if (gpu || a.gpuId) mode = 'a';
@@ -152,6 +161,7 @@ function sanitizeStoredA(raw: Partial<ModeAForm> | undefined): Partial<ModeAForm
   if (typeof raw.quantId === 'string') out.quantId = raw.quantId;
   if (typeof raw.engineId === 'string') out.engineId = raw.engineId;
   if (raw.profile && PROFILES.includes(raw.profile)) out.profile = raw.profile;
+  if (typeof raw.useDSpark === 'boolean') out.useDSpark = raw.useDSpark;
   return out;
 }
 
@@ -164,6 +174,7 @@ function sanitizeStoredB(raw: Partial<ModeBForm> | undefined): Partial<ModeBForm
   if (typeof raw.targetToks === 'number') out.targetToks = raw.targetToks;
   if (typeof raw.quantId === 'string') out.quantId = raw.quantId;
   if (raw.profile && PROFILES.includes(raw.profile)) out.profile = raw.profile;
+  if (typeof raw.useDSpark === 'boolean') out.useDSpark = raw.useDSpark;
   return out;
 }
 
@@ -180,6 +191,7 @@ export function buildShareParams(mode: Mode, a: ModeAForm, b: ModeBForm): URLSea
     params.set('profile', a.profile);
     if (a.utilTarget !== '') params.set('util', String(a.utilTarget));
     if (a.targetToks !== '') params.set('target', String(a.targetToks));
+    if (a.useDSpark) params.set('ds', '1');
   } else {
     if (b.modelId) params.set('model', b.modelId);
     if (b.quantId) params.set('q', b.quantId);
@@ -187,6 +199,7 @@ export function buildShareParams(mode: Mode, a: ModeAForm, b: ModeBForm): URLSea
     if (b.users !== '') params.set('u', String(b.users));
     if (b.targetToks !== '') params.set('target', String(b.targetToks));
     params.set('profile', b.profile);
+    if (b.useDSpark) params.set('ds', '1');
   }
   return params;
 }

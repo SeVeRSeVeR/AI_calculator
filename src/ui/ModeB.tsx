@@ -36,10 +36,10 @@ export function ModeB() {
 
   const engine = engineForQuant(catalog, b.quantId);
   const dense = catalog.models
-    .filter((item) => !item.moe && item.status === 'released')
+    .filter((item) => !item.is_draft && !item.moe && item.status === 'released')
     .sort((x, y) => x.params_total_b - y.params_total_b);
   const moe = catalog.models
-    .filter((item) => item.moe && item.status === 'released')
+    .filter((item) => !item.is_draft && item.moe && item.status === 'released')
     .sort((x, y) => x.params_total_b - y.params_total_b);
 
   const visibleError = (field: string, value: unknown): string | undefined => {
@@ -176,6 +176,22 @@ export function ModeB() {
             hint="По умолчанию 15 tok/s; OPTIMAL обязан обеспечить этот темп."
           />
 
+          <div className="field checkbox-field">
+            <label htmlFor="dspark-b">
+              <input
+                id="dspark-b"
+                type="checkbox"
+                checked={b.useDSpark}
+                onChange={(event) => setB({ useDSpark: event.target.checked })}
+              />
+              <span>DSpark — спекулятивное декодирование</span>
+            </label>
+            <p className="field-hint">
+              Для выбранной модели будет найдена draft-модель. Ускорение: 1.5× для vLLM, 1.3× для
+              llama.cpp. Draft-модель учитывается в VRAM и при подборе MIN/OPTIMAL/MAX.
+            </p>
+          </div>
+
           {model ? (
             <div className="model-summary">
               <strong>{model.name}</strong>
@@ -259,6 +275,7 @@ export function ModeB() {
                   <div><dt>Контекст</dt><dd>{tokens(resultB.contextTokens)}</dd></div>
                   <div><dt>Пользователи</dt><dd>{resultB.users}</dd></div>
                   <div><dt>Цель</dt><dd>{resultB.targetToks} tok/s</dd></div>
+                  {b.useDSpark ? <div><dt>DSpark</dt><dd>включён</dd></div> : null}
                 </dl>
               </div>
 

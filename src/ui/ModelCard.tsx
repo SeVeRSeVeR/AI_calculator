@@ -28,6 +28,8 @@ function reasonText(evaluation: ModelEvaluation): string | null {
       return 'Движок не поддерживает offload. Используйте llama.cpp или карту с большей VRAM.';
     case 'KV_DOES_NOT_FIT':
       return 'KV-кеш для заданного контекста и числа пользователей не помещается.';
+    case 'DSPARK_DRAFT_DOES_NOT_FIT':
+      return 'DSpark draft-модель не помещается даже с offload в RAM. Отключите DSpark или уменьшите контекст.';
     default:
       return null;
   }
@@ -112,6 +114,17 @@ export function ModelCard({
         {model.n_layers} слоёв · {model.n_kv_heads} KV-heads · head_dim {model.head_dim} · контекст до{' '}
         {tokens(model.max_context)} · {model.license}
       </p>
+
+      {evaluation.dsparkRequested ? (
+        evaluation.dsparkSpeedup > 1 ? (
+          <p className="model-dspark">
+            DSpark: +{num((evaluation.dsparkSpeedup - 1) * 100, 0)}% к скорости (draft-модель{' '}
+            {gb(evaluation.draftWeightsGb)})
+          </p>
+        ) : (
+          <p className="model-warning">{evaluation.dsparkWarning ?? 'DSpark не применён.'}</p>
+        )
+      ) : null}
 
       {evaluation.weightsOffloadedGb > 0 ? (
         <p className="model-warning">

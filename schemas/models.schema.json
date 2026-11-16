@@ -34,7 +34,13 @@
           "status": { "enum": ["released", "announced"] },
           "release_year": { "type": "integer", "minimum": 2018, "maximum": 2030 },
           "geometry_source": { "type": "string" },
-          "notes": { "type": "string" }
+          "notes": { "type": "string" },
+          "is_draft": { "type": "boolean" },
+          "dspark_target_models": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" },
+            "uniqueItems": true
+          }
         }
       }
     }

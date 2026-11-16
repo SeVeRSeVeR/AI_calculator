@@ -14,6 +14,13 @@ export const NCCL_NVLINK_GB = 0.75;
 export const OFFLOAD_SPEED_ALPHA = 2.5;
 export const MAX_OFFLOAD_RATIO = 0.5;
 
+// DSpark: спекулятивное декодирование с отдельной draft-моделью (EAGLE-style).
+// ASSUMPTION: консервативные коэффициенты 1.3× для llama.cpp и 1.5× для vLLM/SGLang;
+// в открытых бенчмарках встречается до 1.85×. См. ASSUMPTIONS.md.
+export const DSPARK_WEIGHTS_MULTIPLIER = 1.05;
+export const DSPARK_SPEEDUP_LLAMA_CPP = 1.3;
+export const DSPARK_SPEEDUP_DEFAULT = 1.5;
+
 // ASSUMPTION: профили нагрузки влияют на целевой tok/s и на эффективность батчинга.
 export const PROFILE_SETTINGS: Record<Profile, { targetToks: number; batchMultiplier: number; label: string }> = {
   chat: { targetToks: 15, batchMultiplier: 1.0, label: 'Чат' },
@@ -53,6 +60,52 @@ export function weightsGb(model: Model, quant: Quantization): number {
   return model.params_total_b * quant.bytes_per_param * WEIGHTS_MULTIPLIER;
 }
 
+/** DSpark draft-модель для целевой модели (по dspark_target_models). */
+export function findDraftModel(models: Model[], targetModelId: string): Model | null {
+  return (
+    models.find(
+      (model) => model.is_draft && (model.dspark_target_models ?? []).includes(targetModelId),
+    ) ?? null
+  );
+}
+
+/** W_draft_gb = draft.params_total_b * quant.bytes_per_param * 1.05. */
+export function dsparkDraftWeightsGb(draftModel: Model, quant: Quantization): number {
+  return draftModel.params_total_b * quant.bytes_per_param * DSPARK_WEIGHTS_MULTIPLIER;
+}
+
+export function isDsparkActive(
+  engine: Engine,
+  useDSpark: boolean | undefined,
+  draftModel: Model | null | undefined,
+): boolean {
+  return Boolean(useDSpark && engine.supports_dspark && draftModel);
+}
+
+export function dsparkSpeedupFor(
+  engine: Engine,
+  useDSpark: boolean | undefined,
+  draftModel: Model | null | undefined,
+): number {
+  if (!isDsparkActive(engine, useDSpark, draftModel)) return 1;
+  return engine.id === 'llama_cpp' ? DSPARK_SPEEDUP_LLAMA_CPP : DSPARK_SPEEDUP_DEFAULT;
+}
+
+export function dsparkWarning(
+  engine: Engine,
+  useDSpark: boolean | undefined,
+  draftModel: Model | null | undefined,
+): string | null {
+  if (!useDSpark) return null;
+  if (!engine.supports_dspark) {
+    return `DSpark не поддерживается движком ${engine.name}: ускорение не применено, draft-модель не учитывается.`;
+  }
+  if (!draftModel) {
+    return 'DSpark включён, но для выбранной модели нет draft-модели: ускорение не применено.';
+  }
+  return null;
+}
+
 /** §4.3. head_dim и n_kv_heads берутся из каталога (config.json), а не выводятся. */
 export function kvPerTokenGb(model: Model, quant: Quantization): number {
   return (2 * model.n_layers * model.n_kv_heads * model.head_dim * quant.kv_bytes_per_elem) / 1e9;
@@ -88,6 +141,8 @@ export interface MemoryInput {
   contextTokens: number;
   users: number;
   utilTarget?: number;
+  useDSpark?: boolean;
+  draftModel?: Model | null;
 }
 
 export interface FullMemoryResult {
@@ -99,6 +154,7 @@ export interface FullMemoryResult {
   vramPhysicalGb: number;
   vramTotalGb: number;
   weightsGb: number;
+  draftWeightsGb: number;
   kvPerTokenGb: number;
   kvRequiredGb: number;
   overheadGb: number;
@@ -121,7 +177,10 @@ export function computeFullMemory(input: MemoryInput): FullMemoryResult {
   const vramPerGpuGb = gpuCount > 0 ? gpuCount > 0 ? minGpuVramGb(gpus) : 0 : 0;
   const vramPhysicalGb = totalPhysicalVramGb(gpus);
   const vramTotalGb = vramPhysicalGb * utilTarget;
-  const weights = weightsGb(model, quant);
+  const draftWeights = isDsparkActive(engine, input.useDSpark, input.draftModel) && input.draftModel
+    ? dsparkDraftWeightsGb(input.draftModel, quant)
+    : 0;
+  const weights = weightsGb(model, quant) + draftWeights;
   const perToken = kvPerTokenGb(model, quant);
   const kvRequired = perToken * contextTokens * users;
   const overhead = overheadGb(gpuCount, engine);
@@ -146,6 +205,7 @@ export function computeFullMemory(input: MemoryInput): FullMemoryResult {
     vramPhysicalGb,
     vramTotalGb,
     weightsGb: weights,
+    draftWeightsGb: draftWeights,
     kvPerTokenGb: perToken,
     kvRequiredGb: kvRequired,
     overheadGb: overhead,
@@ -166,6 +226,7 @@ export interface OffloadResult {
   offloadedLayers: number;
   weightsOnGpuGb: number;
   weightsOffloadedGb: number;
+  draftWeightsGb: number;
   offloadRatio: number;
   kvPerTokenGb: number;
   kvRequiredGb: number;
@@ -191,7 +252,10 @@ export function computeOffloadMemory(input: MemoryInput): OffloadResult | null {
   const utilTarget = utilTargetFor(engine, input.utilTarget);
   const gpuCount = gpus.length;
   const vramTotal = totalPhysicalVramGb(gpus) * utilTarget;
-  const weights = weightsGb(model, quant);
+  const draftWeights = isDsparkActive(engine, input.useDSpark, input.draftModel) && input.draftModel
+    ? dsparkDraftWeightsGb(input.draftModel, quant)
+    : 0;
+  const weights = weightsGb(model, quant) + draftWeights;
   const perToken = kvPerTokenGb(model, quant);
   const kvRequired = perToken * contextTokens * users;
   const overhead = overheadGb(gpuCount, engine);
@@ -232,6 +296,7 @@ export function computeOffloadMemory(input: MemoryInput): OffloadResult | null {
     offloadedLayers,
     weightsOnGpuGb: weightsOnGpu,
     weightsOffloadedGb: weightsOffloaded,
+    draftWeightsGb: draftWeights,
     offloadRatio,
     kvPerTokenGb: perToken,
     kvRequiredGb: kvRequired,
@@ -274,6 +339,8 @@ export interface SpeedInput {
   maxParallel: number;
   profile: Profile;
   offloadRatio?: number;
+  useDSpark?: boolean;
+  draftModel?: Model | null;
 }
 
 /** §4.7–4.9. Decode, memory-bandwidth-bound. */
@@ -289,7 +356,8 @@ export function estimateSpeed(input: SpeedInput): SpeedEstimate {
   const raw = (bwEffective * 1e9 * eff) / bytesActive;
   const offloadRatio = clamp(input.offloadRatio ?? 0, 0, 1);
   const penalty = clamp(1 / (1 + OFFLOAD_SPEED_ALPHA * offloadRatio), 0.08, 1);
-  const tokPerSeq = raw * penalty;
+  const dsparkSpeedup = dsparkSpeedupFor(engine, input.useDSpark, input.draftModel);
+  const tokPerSeq = raw * penalty * dsparkSpeedup;
   const batchEfficiency = batchEfficiencyFor(maxParallel, profile);
   const total = tokPerSeq * Math.max(0, maxParallel) * batchEfficiency;
 
@@ -303,6 +371,7 @@ export function estimateSpeed(input: SpeedInput): SpeedEstimate {
     bwEffectiveGbs: bwEffective,
     efficiency: eff,
     tpFactor: tp,
+    dsparkSpeedup,
   };
 }
 
