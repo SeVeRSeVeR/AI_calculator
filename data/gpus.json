@@ -1,5 +1,5 @@
 {
-  "catalog_version": "2026.11.3070ti",
+  "catalog_version": "2026.11",
   "collected_at": "2026-11-16",
   "currency": "USD",
   "gpus": [
@@ -24,6 +24,7 @@
       "notes": "GDDR6X 256-bit, Ada-совместимые FP8 tensor cores."
     },
     {
+      "id": "rtx5090",
       "vendor": "NVIDIA",
       "name": "GeForce RTX 5090",
       "vram_gb": 32,
