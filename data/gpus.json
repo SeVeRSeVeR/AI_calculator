@@ -1,10 +1,29 @@
 {
-  "catalog_version": "2026.11",
+  "catalog_version": "2026.11.3070ti",
   "collected_at": "2026-11-16",
   "currency": "USD",
   "gpus": [
     {
-      "id": "rtx5090",
+      "id": "rtx_3070_ti",
+      "vendor": "NVIDIA",
+      "name": "RTX 3070 Ti",
+      "vram_gb": 8,
+      "bandwidth_gbs": 608,
+      "tdp_w": 220,
+      "nvlink": false,
+      "interconnect": "pcie",
+      "slots": 2,
+      "pcie_lanes": 16,
+      "fp8_tensor_cores": true,
+      "class": "consumer",
+      "release_year": 2021,
+      "unified_memory": false,
+      "rocm_support": false,
+      "bandwidth_source": "official",
+      "price_usd": 700,
+      "notes": "GDDR6X 256-bit, Ada-совместимые FP8 tensor cores."
+    },
+    {
       "vendor": "NVIDIA",
       "name": "GeForce RTX 5090",
       "vram_gb": 32,
