@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/data/
+public/docs/
+coverage/
+*.local
+.DS_Store

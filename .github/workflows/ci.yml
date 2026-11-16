@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Линт
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit-тесты
+        run: npm test
+      - name: Валидация JSON-схем каталога
+        run: npm run validate:data
+      - name: Сборка
+        run: npm run build
+        env:
+          VITE_BASE: '/'
+          VITE_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+      - name: Smoke-проверка маршрутов локальной сборки
+        run: npm run smoke

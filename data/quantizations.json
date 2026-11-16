@@ -1,0 +1,105 @@
+{
+  "catalog_version": "2026.11",
+  "collected_at": "2026-11-16",
+  "quantizations": [
+    {
+      "id": "fp16",
+      "name": "FP16",
+      "family": "gpu",
+      "bits": 16,
+      "bytes_per_param": 2.0,
+      "kv_bytes_per_elem": 2,
+      "description": "Полная точность, максимальная совместимость."
+    },
+    {
+      "id": "bf16",
+      "name": "BF16",
+      "family": "gpu",
+      "bits": 16,
+      "bytes_per_param": 2.0,
+      "kv_bytes_per_elem": 2,
+      "description": "Полная точность с широким динамическим диапазоном."
+    },
+    {
+      "id": "fp8",
+      "name": "FP8 (E4M3)",
+      "family": "gpu",
+      "bits": 8,
+      "bytes_per_param": 1.0,
+      "kv_bytes_per_elem": 1,
+      "description": "Hopper/Ada/Blackwell; KV-кеш также можно держать в FP8."
+    },
+    {
+      "id": "int8",
+      "name": "INT8",
+      "family": "gpu",
+      "bits": 8,
+      "bytes_per_param": 1.0,
+      "kv_bytes_per_elem": 1,
+      "description": "8-битная весовая квантизация."
+    },
+    {
+      "id": "awq_4bit",
+      "name": "AWQ 4-bit",
+      "family": "gpu",
+      "bits": 4,
+      "bytes_per_param": 0.55,
+      "kv_bytes_per_elem": 2,
+      "description": "Activation-aware weight quantization, хорошо для vLLM/SGLang."
+    },
+    {
+      "id": "gptq_4bit",
+      "name": "GPTQ 4-bit",
+      "family": "gpu",
+      "bits": 4,
+      "bytes_per_param": 0.55,
+      "kv_bytes_per_elem": 2,
+      "description": "GPTQ, широкая поддержка в vLLM/TGI."
+    },
+    {
+      "id": "q8_0",
+      "name": "GGUF Q8_0",
+      "family": "gguf",
+      "bits": 8,
+      "bytes_per_param": 1.06,
+      "kv_bytes_per_elem": 2,
+      "description": "Почти без потерь, удобно для llama.cpp."
+    },
+    {
+      "id": "q6_k",
+      "name": "GGUF Q6_K",
+      "family": "gguf",
+      "bits": 6,
+      "bytes_per_param": 0.82,
+      "kv_bytes_per_elem": 2,
+      "description": "Компромисс качества и памяти."
+    },
+    {
+      "id": "q5_k_m",
+      "name": "GGUF Q5_K_M",
+      "family": "gguf",
+      "bits": 5,
+      "bytes_per_param": 0.7,
+      "kv_bytes_per_elem": 2,
+      "description": "Средняя квантизация."
+    },
+    {
+      "id": "q4_k_m",
+      "name": "GGUF Q4_K_M",
+      "family": "gguf",
+      "bits": 4,
+      "bytes_per_param": 0.55,
+      "kv_bytes_per_elem": 2,
+      "description": "Де-факто стандарт для локального инференса."
+    },
+    {
+      "id": "q3_k_m",
+      "name": "GGUF Q3_K_M",
+      "family": "gguf",
+      "bits": 3,
+      "bytes_per_param": 0.43,
+      "kv_bytes_per_elem": 2,
+      "description": "Агрессивная квантизация, заметная потеря качества."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cpus.schema.json",
+  "title": "CPU catalog",
+  "type": "object",
+  "required": ["catalog_version", "collected_at", "cpus"],
+  "properties": {
+    "catalog_version": { "type": "string" },
+    "collected_at": { "type": "string", "format": "date" },
+    "cpus": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "vendor", "name", "cores", "pcie_lanes", "tdp_w", "class", "price_usd"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9._-]+$" },
+          "vendor": { "type": "string" },
+          "name": { "type": "string" },
+          "cores": { "type": "integer", "minimum": 2 },
+          "pcie_lanes": { "type": "integer", "minimum": 0 },
+          "tdp_w": { "type": "number", "exclusiveMinimum": 0 },
+          "class": { "enum": ["consumer", "hedt", "workstation", "server"] },
+          "price_usd": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

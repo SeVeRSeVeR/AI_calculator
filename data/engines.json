@@ -1,0 +1,54 @@
+{
+  "catalog_version": "2026.11",
+  "collected_at": "2026-11-16",
+  "engines": [
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "gpu_only": true,
+      "offload_supported": false,
+      "default_util_target": 0.9,
+      "overhead_gb": 1.5,
+      "supports_tp": true,
+      "kv_bytes_per_elem": 2,
+      "quant_family": "gpu",
+      "notes": "gpu_memory_utilization=0.9 по умолчанию; CUDA graphs, activations и profiling reservation входят в overhead."
+    },
+    {
+      "id": "llama_cpp",
+      "name": "llama.cpp",
+      "gpu_only": false,
+      "offload_supported": true,
+      "default_util_target": 0.95,
+      "overhead_gb": 1.5,
+      "supports_tp": false,
+      "kv_bytes_per_elem": 2,
+      "quant_family": "gguf",
+      "notes": "Layer-split между GPU, offload через n_gpu_layers; фиксированный compute buffer."
+    },
+    {
+      "id": "tgi",
+      "name": "TGI",
+      "gpu_only": true,
+      "offload_supported": false,
+      "default_util_target": 0.9,
+      "overhead_gb": 1.5,
+      "supports_tp": true,
+      "kv_bytes_per_elem": 2,
+      "quant_family": "gpu",
+      "notes": "Text Generation Inference; резервирует память аналогично vLLM."
+    },
+    {
+      "id": "sglang",
+      "name": "SGLang",
+      "gpu_only": true,
+      "offload_supported": false,
+      "default_util_target": 0.9,
+      "overhead_gb": 1.5,
+      "supports_tp": true,
+      "kv_bytes_per_elem": 2,
+      "quant_family": "gpu",
+      "notes": "Paged KV-сервер, RadixAttention; резерв ~10% VRAM."
+    }
+  ]
+}

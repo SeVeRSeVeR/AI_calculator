@@ -1,0 +1,126 @@
+{
+  "catalog_version": "2026.11",
+  "collected_at": "2026-11-16",
+  "cpus": [
+    {
+      "id": "ryzen-9-9950x",
+      "vendor": "AMD",
+      "name": "Ryzen 9 9950X",
+      "cores": 16,
+      "pcie_lanes": 24,
+      "tdp_w": 170,
+      "class": "consumer",
+      "price_usd": 620
+    },
+    {
+      "id": "ryzen-9-7950x",
+      "vendor": "AMD",
+      "name": "Ryzen 9 7950X",
+      "cores": 16,
+      "pcie_lanes": 24,
+      "tdp_w": 170,
+      "class": "consumer",
+      "price_usd": 520
+    },
+    {
+      "id": "core-i9-14900k",
+      "vendor": "Intel",
+      "name": "Core i9-14900K",
+      "cores": 24,
+      "pcie_lanes": 20,
+      "tdp_w": 253,
+      "class": "consumer",
+      "price_usd": 550
+    },
+    {
+      "id": "core-ultra-9-285k",
+      "vendor": "Intel",
+      "name": "Core Ultra 9 285K",
+      "cores": 24,
+      "pcie_lanes": 24,
+      "tdp_w": 250,
+      "class": "consumer",
+      "price_usd": 590
+    },
+    {
+      "id": "threadripper-7970x",
+      "vendor": "AMD",
+      "name": "Threadripper 7970X",
+      "cores": 32,
+      "pcie_lanes": 48,
+      "tdp_w": 350,
+      "class": "hedt",
+      "price_usd": 2500
+    },
+    {
+      "id": "threadripper-7980x",
+      "vendor": "AMD",
+      "name": "Threadripper 7980X",
+      "cores": 64,
+      "pcie_lanes": 48,
+      "tdp_w": 350,
+      "class": "hedt",
+      "price_usd": 5000
+    },
+    {
+      "id": "threadripper-pro-7995wx",
+      "vendor": "AMD",
+      "name": "Threadripper PRO 7995WX",
+      "cores": 96,
+      "pcie_lanes": 128,
+      "tdp_w": 350,
+      "class": "workstation",
+      "price_usd": 10000
+    },
+    {
+      "id": "xeon-w9-3495x",
+      "vendor": "Intel",
+      "name": "Xeon w9-3495X",
+      "cores": 56,
+      "pcie_lanes": 112,
+      "tdp_w": 350,
+      "class": "workstation",
+      "price_usd": 6000
+    },
+    {
+      "id": "xeon-silver-4410y",
+      "vendor": "Intel",
+      "name": "Xeon Silver 4410Y",
+      "cores": 12,
+      "pcie_lanes": 80,
+      "tdp_w": 150,
+      "class": "server",
+      "price_usd": 600
+    },
+    {
+      "id": "xeon-gold-6430",
+      "vendor": "Intel",
+      "name": "Xeon Gold 6430",
+      "cores": 32,
+      "pcie_lanes": 80,
+      "tdp_w": 270,
+      "class": "server",
+      "price_usd": 2200
+    },
+    {
+      "id": "epyc-9354",
+      "vendor": "AMD",
+      "name": "EPYC 9354",
+      "cores": 32,
+      "pcie_lanes": 128,
+      "tdp_w": 280,
+      "class": "server",
+      "price_usd": 3000
+    },
+    {
+      "id": "epyc-9654",
+      "vendor": "AMD",
+      "name": "EPYC 9654",
+      "cores": 96,
+      "pcie_lanes": 128,
+      "tdp_w": 360,
+      "class": "server",
+      "price_usd": 9000
+    }
+  ]
+}

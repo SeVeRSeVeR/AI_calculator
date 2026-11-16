@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta
+      name="description"
+      content="Калькулятор сервера для локального инференса LLM: VRAM, KV-кеш, tok/s, CPU, RAM, NVMe и PSU."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>LLM Server Calculator — подбор железа для локального инференса</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <div style="max-width: 720px; margin: 40px auto; font-family: sans-serif; line-height: 1.5">
+        <h1>Для работы калькулятора нужен JavaScript</h1>
+        <p>
+          Калькулятор полностью выполняется в браузере: он не отправляет данные на сервер и не
+          использует внешние CDN. Включите JavaScript и перезагрузите страницу.
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

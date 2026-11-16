@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "quantizations.schema.json",
+  "title": "Quantization catalog",
+  "type": "object",
+  "required": ["catalog_version", "collected_at", "quantizations"],
+  "properties": {
+    "catalog_version": { "type": "string" },
+    "collected_at": { "type": "string", "format": "date" },
+    "quantizations": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "family", "bits", "bytes_per_param", "kv_bytes_per_elem", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "name": { "type": "string" },
+          "family": { "enum": ["gpu", "gguf"] },
+          "bits": { "type": "integer", "minimum": 2, "maximum": 32 },
+          "bytes_per_param": { "type": "number", "exclusiveMinimum": 0 },
+          "kv_bytes_per_elem": { "type": "number", "exclusiveMinimum": 0 },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}
