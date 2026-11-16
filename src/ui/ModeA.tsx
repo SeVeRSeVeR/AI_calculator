@@ -121,6 +121,7 @@ export function ModeA() {
                 ))}
               </optgroup>
             </select>
+            {/* Фильтр по названию GPU - позволяет быстро найти нужную карту по частичному совпадению */}
             <div className="field-row">
               <div className="field">
                 <label htmlFor="gpu-filter">Фильтр по названию GPU</label>
