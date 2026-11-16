@@ -89,58 +89,32 @@ export function ModeA() {
         </div>
 
         <form onSubmit={onSubmit} noValidate>
+          {/* GPU - встроенная фильтрация по названию */}
           <div className="field">
             <label htmlFor="gpu">GPU</label>
-            <select
+            {/* Фильтруемое поле GPU - встроенная фильтрация без отдельного поля */}
+            <datalist id="gpu-list">
+              {catalog.gpus.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} — {item.vram_gb} ГБ · {item.bandwidth_gbs} ГБ/с · {item.tdp_w} Вт
+                </option>
+              ))}
+            </datalist>
+            <input
               id="gpu"
+              list="gpu-list"
               value={a.gpuId}
               aria-invalid={visibleError('gpuId', a.gpuId) ? true : undefined}
               aria-describedby={visibleError('gpuId', a.gpuId) ? 'gpu-error' : 'gpu-hint'}
               onChange={(event) => setA({ gpuId: event.target.value })}
-            >
-              <option value="">Выберите GPU</option>
-              <optgroup label="Consumer">
-                {catalog.gpus.filter((item) => item.class === 'consumer').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).length > 0 && catalog.gpus.filter((item) => item.class === 'consumer').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} — {item.vram_gb} ГБ · {item.bandwidth_gbs} ГБ/с · {item.tdp_w} Вт
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Workstation / prosumer">
-                {catalog.gpus.filter((item) => item.class === 'prosumer').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).length > 0 && catalog.gpus.filter((item) => item.class === 'prosumer').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} — {item.vram_gb} ГБ · {item.bandwidth_gbs} ГБ/с · {item.tdp_w} Вт
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Datacenter">
-                {catalog.gpus.filter((item) => item.class === 'datacenter').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).length > 0 && catalog.gpus.filter((item) => item.class === 'datacenter').filter((item) => item.name.toLowerCase().includes(a.gpuFilter?.toLowerCase() ?? '')).map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} — {item.vram_gb} ГБ · {item.bandwidth_gbs} ГБ/с · {item.tdp_w} Вт
-                  </option>
-                ))}
-              </optgroup>
-            </select>
-            {/* Фильтр по названию GPU - позволяет быстро найти нужную карту по частичному совпадению имени */}
-            <div className="field-row">
-              <div className="field">
-                <label htmlFor="gpu-filter">Фильтр по названию GPU</label>
-                <input
-                  id="gpu-filter"
-                  type="text"
-                  placeholder="Например: RTX 5090, A100 или RX..."
-                  value={a.gpuFilter}
-                  onChange={(event) => setA({ gpuFilter: event.target.value })}
-                />
-                <p className="field-hint">Введите часть названия видеокарты для фильтрации списка.</p>
-              </div>
-            </div>
-            <p className="field-hint" id="gpu-hint">
+              placeholder="Выберите GPU или введите часть названия"
+            />
+            <p className="field-hint" id="gpu-hint"> {/* Подсказка с характеристиками выбранной GPU */}
               {gpu
                 ? `${gpu.vendor} · ${gpu.vram_gb} ГБ · ${gpu.bandwidth_gbs} ГБ/с · ${gpu.tdp_w} Вт${gpu.unified_memory ? ' · unified memory' : ''}${gpu.rocm_support ? ' · ROCm' : ''}${gpu.xpu_support ? ' · XPU' : ''}`
                 : 'VRAM, пропускная способность и TDP берутся из каталога.'}
             </p>
-            {visibleError('gpuId', a.gpuId) ? <p className="field-error" id="gpu-error" role="alert">{visibleError('gpuId', a.gpuId)}</p> : null}
+            {visibleError('gpuId', a.gpuId) ? <p className="field-error" id="gpu-error" role="alert">{/* Ошибка валидации GPU */}{visibleError('gpuId', a.gpuId)}</p> : null}
           </div>
 
           <div className="field-row">
