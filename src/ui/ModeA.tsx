@@ -123,7 +123,7 @@ export function ModeA() {
             </select>
             <p className="field-hint" id="gpu-hint">
               {gpu
-                ? `${gpu.vendor} · ${gpu.vram_gb} ГБ · ${gpu.bandwidth_gbs} ГБ/с · ${gpu.tdp_w} Вт${gpu.unified_memory ? ' · unified memory' : ''}${gpu.rocm_support ? ' · ROCm' : ''}`
+                ? `${gpu.vendor} · ${gpu.vram_gb} ГБ · ${gpu.bandwidth_gbs} ГБ/с · ${gpu.tdp_w} Вт${gpu.unified_memory ? ' · unified memory' : ''}${gpu.rocm_support ? ' · ROCm' : ''}${gpu.xpu_support ? ' · XPU' : ''}`
                 : 'VRAM, пропускная способность и TDP берутся из каталога.'}
             </p>
             {visibleError('gpuId', a.gpuId) ? <p className="field-error" id="gpu-error" role="alert">{visibleError('gpuId', a.gpuId)}</p> : null}
@@ -161,11 +161,11 @@ export function ModeA() {
               label="Окно контекста, токенов"
               value={a.context}
               min={1}
-              max={1_000_000}
+              max={1_048_576}
               onChange={(value) => setA({ context: value })}
               error={visibleError('context', a.context)}
               warning={a.context !== '' && Number(a.context) < 512 ? validation.warnings.context : undefined}
-              hint="512–1 000 000; KV-кеш растёт линейно"
+              hint="512–1 048 576; KV-кеш растёт линейно"
             />
             <ValidatedInput
               id="users"

@@ -34,6 +34,7 @@
           "release_year": { "type": "integer", "minimum": 2015, "maximum": 2030 },
           "unified_memory": { "type": "boolean" },
           "rocm_support": { "type": "boolean" },
+          "xpu_support": { "type": "boolean" },
           "bandwidth_source": { "enum": ["official", "third_party", "computed"] },
           "price_usd": { "type": ["number", "null"], "minimum": 0 },
           "notes": { "type": "string" }

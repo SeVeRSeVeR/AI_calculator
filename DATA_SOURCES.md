@@ -37,6 +37,16 @@
 | mi325x | Instinct MI325X | 256 | 6000 | 1000 | Infinity Fabric | datacenter | 25000 | AMD Instinct MI325X, datasheet |
 | dgx_spark | DGX Spark | 128 | 273 | 240 | Unified | prosumer | 3999 | NVIDIA DGX Spark, официальная спецификация |
 | mac_studio_m3_ultra | Mac Studio M3 Ultra 96GB | 96 | 819 | 270 | Unified | prosumer | 7000 | Apple Mac Studio, техническая спецификация |
+| rtx_pro_5000_bw_48 | RTX PRO 5000 Blackwell 48GB | 48 | 1344 | 300 | PCIe 5.0 | prosumer | 4000 | NVIDIA RTX PRO 5000 Blackwell, datasheet |
+| rtx_pro_5000_bw_72 | RTX PRO 5000 Blackwell 72GB | 72 | 1344 | 300 | PCIe 5.0 | prosumer | — | NVIDIA RTX PRO 5000 Blackwell, datasheet |
+| rtx_pro_6000_bw_ws | RTX PRO 6000 Blackwell Workstation | 96 | 1792 | 600 | PCIe 5.0 | datacenter | 8565 | NVIDIA RTX PRO 6000 Blackwell Workstation Edition, datasheet |
+| rtx_pro_6000_bw_maxq | RTX PRO 6000 Blackwell Max-Q | 96 | 1792 | 300 | PCIe 5.0 | datacenter | 8565 | NVIDIA RTX PRO 6000 Blackwell Max-Q, datasheet |
+| rtx_5090 | RTX 5090 | 32 | 1792 | 575 | PCIe 5.0 | consumer | 1999 | NVIDIA GeForce RTX 50 Series, официальная спецификация |
+| rtx_5080 | RTX 5080 | 16 | 960 | 360 | PCIe 5.0 | consumer | 999 | NVIDIA GeForce RTX 50 Series, официальная спецификация |
+| rtx_5070_ti | RTX 5070 Ti | 16 | 896 | 300 | PCIe 5.0 | consumer | 749 | NVIDIA GeForce RTX 50 Series, официальная спецификация |
+| rtx_5060_ti_16 | RTX 5060 Ti 16GB | 16 | 448 | 180 | PCIe 5.0 | consumer | 429 | NVIDIA GeForce RTX 50 Series, официальная спецификация |
+| amd_r9700_pro | AMD Radeon AI PRO R9700 | 32 | 640 | 300 | PCIe 5.0 | prosumer | 1299 | AMD Radeon AI PRO R9700, официальная страница продукта |
+| intel_arc_pro_b70 | Intel Arc Pro B70 | 32 | 512 | 250 | PCIe 5.0 | prosumer | — | Intel Arc Pro B70, официальная страница продукта |
 
 Примечания:
 
@@ -44,6 +54,10 @@
 - Для consumer-карт `pcie_lanes = 16`, `slots = 2`; для датацентровых — форм-фактор SXM/OAM и NVLink.
 - `bandwidth_source = "official"` у всех записей: использованы паспортные значения, а не измеренная пропускная способность.
 - `rocm_support = true` для Radeon и Instinct; для NVIDIA — `false`.
+- `xpu_support = true` для Intel Arc Pro B70 (oneAPI/XPU); для остальных карт поле отсутствует или `false`.
+- У новых карт NVIDIA, AMD и Intel заполнены `unified_memory = false` и `bandwidth_source = "official"`.
+- RTX 5060 Ti 16GB использует PCIe 5.0 x8 электрически; в каталоге указано 16 линий для совместимости с остальными consumer-картами.
+- Цены RTX PRO 5000 72GB и Intel Arc Pro B70 не зафиксированы официально на дату сбора и оставлены `null`; для расчёта БП и памяти цена не используется.
 - Цены на H100/H200/B200/A100/MI300X/MI325X — ориентир за карту на вторичном/контрактном рынке; реальные цены зависят от объёма поставки и партнёра.
 - DGX Spark и Mac Studio M3 Ultra помечены `unified_memory = true`. Их «VRAM» — общий пул unified memory, а не отдельная видеопамять.
 
@@ -83,6 +97,21 @@
 | gpt-oss-20b | GPT-OSS 20B | 21 | 3.6 | 24 | 8 | 64 | 131072 | openai/gpt-oss-20b |
 | deepseek-r1-distill-qwen-32b | DeepSeek R1 Distill Qwen 32B | 32.8 | 32.8 | 64 | 8 | 128 | 131072 | deepseek-ai/DeepSeek-R1-Distill-Qwen-32B |
 | yi-1.5-34b | Yi 1.5 34B | 34.4 | 34.4 | 60 | 8 | 128 | 32768 | 01-ai/Yi-1.5-34B |
+| mimo_v2_6_pro | MiMo-V2.6-Pro | 1020 | 42 | 70 | 8 | 192 | 1048576 | XiaomiMiMo/MiMo-V2.6-Pro-RL (официальный Pro gated) |
+| deepseek_v4_1_flash | DeepSeek V4.1 Flash | 552 | 16 | 40 | 1 | 512 | 1048576 | deepseek-ai/DeepSeek-V4.1-Flash |
+| kimi_k3 | Kimi K3 | 2800 | 104 | 93 | 96 | 128 | 1048576 | moonshotai/Kimi-K3 |
+| qwen3_8_2_4t_a95b | Qwen3.8 2.4T-A95B | 2400 | 95 | 92 | 4 | 256 | 262144 | Qwen/Qwen3.8-2.4T-A95B |
+| glm_5_3 | GLM-5.3 | 744 | 40 | 78 | 64 | 192 | 1048576 | zai-org/GLM-5.3 |
+| minimax_m3 | MiniMax M3 | 428 | 23 | 60 | 4 | 128 | 1048576 | MiniMaxAI/MiniMax-M3 |
+| deepseek_v4_flash | DeepSeek V4-Flash | 284 | 13 | 43 | 1 | 512 | 1048576 | deepseek-ai/DeepSeek-V4-Flash |
+| mistral_small_4_119b | Mistral Small 4 119B | 119 | 6.5 | 36 | 32 | 128 | 262144 | mistralai/Mistral-Small-4-119B-2603 |
+| gpt_oss_120b | gpt-oss-120b | 120 | 5.1 | 36 | 8 | 64 | 131072 | openai/gpt-oss-120b |
+| qwen3_6_35b_a3b | Qwen3.6-35B-A3B | 35 | 3 | 40 | 2 | 256 | 262144 | Qwen/Qwen3.6-35B-A3B |
+| llama_4_maverick | Llama 4 Maverick | 400 | 17 | 48 | 8 | 128 | 131072 | meta-llama/Llama-4-Maverick-17B-128E-Instruct |
+| qwen3_8_27b | Qwen3.8-27B | 27 | 27 | 64 | 4 | 256 | 262144 | Qwen/Qwen3.8-27B |
+| gemma_4_31b | Gemma 4 31B | 31 | 31 | 60 | 16 | 256 | 262144 | google/gemma-4-31B-it |
+| gemma_4_12b | Gemma 4 12B | 11.95 | 11.95 | 48 | 8 | 256 | 262144 | google/gemma-4-12B-it |
+| ornith_1_5_122b | Ornith 1.5 122B | 122 | 122 | 48 | 2 | 256 | 262144 | ornith-ai/Ornith-1.5-122B |
 
 Примечания:
 
@@ -92,6 +121,47 @@
 - Llama 4 Scout заявлен с контекстом до 10M токенов; в каталоге указано 10 485 760. Для практического расчёта это означает очень большой KV-кеш и, как правило, `NO_FIT` без сжатия/кэширования.
 - `deepseek-v4-flash`, `deepseek-v4-pro`, `kimi-k2.6` — записи на дату сбора; если репозиторий или `config.json` ещё не опубликован, использованы публичные анонсы и консервативные оценки. Проверяйте перед продакшеном.
 - `max_context` — заявленное максимальное окно; реальная поддержка зависит от движка и версии модели.
+- Лицензии новых моделей перенесены из задания и карточек Hugging Face: Kimi K3 (`commercial_ok = false`, отдельная лицензия при выручке > $20M), Qwen3.8 2.4T-A95B (`Qwen3.8-Max`, `false`), GLM-5.3 (`true`), MiniMax M3 (`MiniMax Community`, `false`), остальные MoE — MIT/Apache-2.0/Llama 4.
+- `MiMo-V2.6-Pro`: официальный репозиторий модели gated (HTTP 401), геометрия взята из `XiaomiMiMo/MiMo-V2.6-Pro-RL` (70 слоёв, 8 KV-heads, head_dim 192).
+- `Mistral Small 4 119B`: официальный идентификатор `mistralai/Mistral-Small-4-119B-2603`.
+- `Llama 4 Maverick`: официальный `config.json` gated (HTTP 401); геометрия сверена с существующей записью `llama-4-maverick`.
+- `Ornith 1.5 122B`: в `config.json` обнаружены 256 экспертов (top-8), то есть архитектурно это MoE. По заданию запись внесена как dense (`moe = false`, 122/122); расхождение зафиксировано в `notes`.
+- `deepseek_v4_flash` и `gpt_oss_120b` дополняют существующие записи `deepseek-v4-flash` и `gpt-oss-120b` с другими значениями из задания; это осознанные отдельные записи каталога.
+
+## Ссылки на первоисточники
+
+Дата сбора: **2026-11-16**.
+
+**NVIDIA**
+- GeForce RTX 50 Series: <https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/>
+- RTX PRO 5000 Blackwell: <https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-5000/>
+- RTX PRO 6000 Blackwell: <https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-6000/>
+- RTX PRO 6000 Blackwell Max-Q: <https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-6000/>
+
+**AMD**
+- Radeon AI PRO R9700: <https://www.amd.com/en/products/graphics/workstations/radeon-pro/ai-pro-r9700.html>
+- ROCm documentation: <https://rocm.docs.amd.com/>
+
+**Intel**
+- Intel Arc Pro B70: <https://www.intel.com/content/www/us/en/products/sku/242861/intel-arc-pro-b70-graphics/specifications.html>
+- oneAPI / XPU: <https://www.intel.com/content/www/us/en/developer/tools/oneapi/overview.html>
+
+**Hugging Face (config.json)**
+- <https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Pro-RL>
+- <https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash>
+- <https://huggingface.co/moonshotai/Kimi-K3>
+- <https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B>
+- <https://huggingface.co/zai-org/GLM-5.3>
+- <https://huggingface.co/MiniMaxAI/MiniMax-M3>
+- <https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash>
+- <https://huggingface.co/mistralai/Mistral-Small-4-119B-2603>
+- <https://huggingface.co/openai/gpt-oss-120b>
+- <https://huggingface.co/Qwen/Qwen3.6-35B-A3B>
+- <https://huggingface.co/meta-llama/Llama-4-Maverick-17B-128E-Instruct>
+- <https://huggingface.co/Qwen/Qwen3.8-27B>
+- <https://huggingface.co/google/gemma-4-31B-it>
+- <https://huggingface.co/google/gemma-4-12B-it>
+- <https://huggingface.co/ornith-ai/Ornith-1.5-122B>
 
 ## Квантизации
 

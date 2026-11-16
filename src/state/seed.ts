@@ -54,7 +54,7 @@ export function mergeSeed(
   }
 
   a.gpuCount = clampInt(rawA.gpuCount ?? a.gpuCount, 1, 8, 1);
-  a.context = clampInt(rawA.context ?? a.context, 1, 1_000_000, 8192);
+  a.context = clampInt(rawA.context ?? a.context, 1, 1_048_576, 8192);
   a.users = clampInt(rawA.users ?? a.users, 1, 10_000, 1);
   if (rawA.targetToks !== undefined) a.targetToks = clampInt(rawA.targetToks, 1, 1_000, '');
   if (rawA.utilTarget !== undefined) {
@@ -71,7 +71,7 @@ export function mergeSeed(
     if (catalog.quantizations.some((quant) => quant.id === rawB.quantId)) b.quantId = rawB.quantId;
     else if (activeMode === 'b') ignored = true;
   }
-  b.context = clampInt(rawB.context ?? b.context, 1, 1_000_000, 8192);
+  b.context = clampInt(rawB.context ?? b.context, 1, 1_048_576, 8192);
   b.users = clampInt(rawB.users ?? b.users, 1, 10_000, 1);
   b.targetToks = clampInt(rawB.targetToks ?? b.targetToks, 1, 1_000, 15);
   if (rawB.profile && PROFILES.includes(rawB.profile)) b.profile = rawB.profile;

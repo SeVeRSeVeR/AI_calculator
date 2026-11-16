@@ -70,7 +70,7 @@ export function readSeed(): Seed | null {
   if (n !== undefined) a.gpuCount = n;
   else if (params.has('n')) ignored = true;
 
-  const ctx = parseInteger(params.get('ctx'), 1, 1_000_000);
+  const ctx = parseInteger(params.get('ctx'), 1, 1_048_576);
   if (ctx !== undefined) {
     a.context = ctx;
     b.context = ctx;

@@ -18,6 +18,7 @@ export interface Gpu {
   release_year: number;
   unified_memory: boolean;
   rocm_support: boolean;
+  xpu_support?: boolean;
   bandwidth_source: BandwidthSource;
   price_usd?: number | null;
   notes?: string;

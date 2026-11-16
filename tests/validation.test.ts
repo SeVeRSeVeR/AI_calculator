@@ -36,7 +36,7 @@ describe('валидация и ссылки', () => {
     expect(validateModeA({ ...base, gpuCount: 9 }, catalog).errors.gpuCount).toBeTruthy();
     expect(validateModeA({ ...base, gpuCount: 2.5 }, catalog).errors.gpuCount).toBeTruthy();
     expect(validateModeA({ ...base, context: -1 }, catalog).errors.context).toBeTruthy();
-    expect(validateModeA({ ...base, context: 1_000_001 }, catalog).errors.context).toBeTruthy();
+    expect(validateModeA({ ...base, context: 1_048_577 }, catalog).errors.context).toBeTruthy();
     expect(validateModeA({ ...base, users: 0 }, catalog).errors.users).toBeTruthy();
     expect(validateModeA({ ...base, users: 10_001 }, catalog).errors.users).toBeTruthy();
     expect(validateModeA({ ...base, users: 1.5 }, catalog).errors.users).toBeTruthy();

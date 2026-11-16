@@ -146,7 +146,7 @@ export function ModeB() {
               label="Окно контекста, токенов"
               value={b.context}
               min={1}
-              max={model?.max_context ?? 1_000_000}
+              max={model?.max_context ?? 1_048_576}
               onChange={(value) => setB({ context: value })}
               error={visibleError('context', b.context)}
               warning={b.context !== '' && Number(b.context) < 512 ? validation.warnings.context : undefined}

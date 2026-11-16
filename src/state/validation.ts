@@ -48,7 +48,7 @@ export function validateModeA(form: ModeAForm, catalog: Catalog): ValidationResu
   }
 
   if (isBlank(form.context)) errors.context = ru.validation.required;
-  else if (!isInteger(Number(form.context)) || Number(form.context) < 1 || Number(form.context) > 1_000_000) {
+  else if (!isInteger(Number(form.context)) || Number(form.context) < 1 || Number(form.context) > 1_048_576) {
     errors.context = ru.validation.contextRange;
   } else if (Number(form.context) < 512) {
     warnings.context = ru.validation.contextSmall;
@@ -90,7 +90,7 @@ export function validateModeB(form: ModeBForm, catalog: Catalog, model: Model | 
   else if (!model) errors.modelId = ru.validation.modelRequired;
 
   if (isBlank(form.context)) errors.context = ru.validation.required;
-  else if (!isInteger(Number(form.context)) || Number(form.context) < 1 || Number(form.context) > 1_000_000) {
+  else if (!isInteger(Number(form.context)) || Number(form.context) < 1 || Number(form.context) > 1_048_576) {
     errors.context = ru.validation.contextRange;
   } else if (model && Number(form.context) > model.max_context) {
     errors.context = ru.validation.contextOverMax(model.max_context);
